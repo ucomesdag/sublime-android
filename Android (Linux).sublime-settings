@@ -1,0 +1,9 @@
+{
+	"jdk_bin": "/usr/lib/jvm/java-6-sun/jre",
+	"ant_bin": "/usr/share/ant/bin",
+	"android_sdk": "/home/${USER}/adt-bundle-linux/sdk",
+    "default_android_project_dir": "",
+    "debug": true,
+    "compile_on_save": true,
+    "run_on_device": true
+}

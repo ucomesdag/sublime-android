@@ -1,0 +1,7 @@
+*.pyc
+*.cache
+*.sublime-project
+*.sublime-workspace
+*.swap
+~*
+*_
