@@ -11,7 +11,8 @@ from Default.exec import ExecCommand
 import platform
 
 scriptpath = os.path.sep.join([os.path.dirname(os.path.abspath(__file__)), ""])
-platform = platform.system()
+#platform = sublime.platform() #Stopped working in sublime text 3 beta
+platform = platform.system().lower().replace('darwin', 'osx')
 
 adb_bin = os.path.sep.join(["platform-tools","adb"])
 logcat_script = "logcat"
@@ -20,7 +21,7 @@ android_bin = os.path.sep.join(["tools", "android"])
 ddms_bin = os.path.sep.join(["tools", "ddms"])
 ant_bin = "ant"
 java_bin = os.path.sep.join(["bin","java"])
-if platform == 'Windows' :
+if platform == 'windows' :
     adb_bin += ".exe"
     logcat_script += ".bat"
     run_script += ".bat"
@@ -32,18 +33,11 @@ else:
     logcat_script += ".sh"
     run_script += ".sh"
 
-# args = {
-#             'windows': "Android (Windows).sublime-settings",
-#             'osx': "Android (OSX).sublime-settings",
-#             'linux': "Android (Linux).sublime-settings"
-#         }
-# settings_file = args[platform]
 args = {
-            'Windows': "Android (Windows).sublime-settings",
-            'Darwin': "Android (OSX).sublime-settings",
-            'Linux': "Android (Linux).sublime-settings"
+            'windows': "Android (Windows).sublime-settings",
+            'osx': "Android (OSX).sublime-settings",
+            'linux': "Android (Linux).sublime-settings"
         }
-
 settings_file = args[platform]
 
 def getBuiltTargets():
@@ -51,7 +45,7 @@ def getBuiltTargets():
     settings = AndroidSettings(sublime.load_settings(settings_file))
     if not settings.is_valid():
         return
-    if platform == 'Windows' :
+    if platform == 'windows' :
         si = subprocess.STARTUPINFO()
         si.dwFlags = subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
     else:
@@ -243,7 +237,7 @@ class AndroidOpenSdkCommand(sublime_plugin.WindowCommand):
         self.settings = AndroidSettings(sublime.load_settings(settings_file))
         if not self.settings.is_valid():
             return
-        if platform == 'Windows' :
+        if platform == 'windows' :
             subprocess.Popen([self.settings.sdk + android_bin, "sdk"], creationflags=0x08000000, shell=False)
         else:
             subprocess.Popen([self.settings.sdk + android_bin, "sdk"], shell=False)
@@ -254,7 +248,7 @@ class AndroidOpenAvdCommand(sublime_plugin.WindowCommand):
         self.settings = AndroidSettings(sublime.load_settings(settings_file))
         if not self.settings.is_valid():
             return
-        if platform == 'Windows' :
+        if platform == 'windows' :
             subprocess.Popen([self.settings.sdk + android_bin, "avd"], creationflags=0x08000000, shell=False)
         else:
             subprocess.Popen([self.settings.sdk + android_bin, "avd"], shell=False)
@@ -265,7 +259,7 @@ class AndroidOpenDdmsCommand(sublime_plugin.WindowCommand):
         self.settings = AndroidSettings(sublime.load_settings(settings_file))
         if not self.settings.is_valid():
             return
-        if platform == 'Windows' :
+        if platform == 'windows' :
             subprocess.Popen([self.settings.sdk + ddms_bin], creationflags=0x08000000, shell=False)
         else:
             subprocess.Popen([self.settings.sdk + ddms_bin], shell=False)
@@ -410,7 +404,7 @@ class AndroidBuildCommand(sublime_plugin.WindowCommand):
         #     "--path", self.path]
         # }
         # self.window.run_command("exec", args)
-        self.cmd_buildxml = [self.settings.sdk + android_bin,
+        self.cmd = [self.settings.sdk + android_bin,
             "update", "project",
             "--target", "\"%s\"" % self.build_target,
             "--path", self.path]
@@ -871,7 +865,7 @@ class AndroidAdbShellCommand(sublime_plugin.WindowCommand):
         else:
             # The following is only tested on ubuntu
             param = ""
-            if platform == 'Windows': param = ''
+            if platform == 'windows': param = ''
             elif platform == 'Darwin': param = '-x'
             elif platform == 'Linux':
                 ps = 'ps -eo comm | grep -E "gnome-session|ksmserver|' + \
