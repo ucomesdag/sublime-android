@@ -46,6 +46,7 @@ args = {
 
 settings_file = args[platform]
 
+#TODO:
 def getBuiltTargets():
     targets = []
     settings = AndroidSettings(sublime.load_settings(settings_file))
@@ -236,6 +237,19 @@ class AndroidShowReadmeCommand(sublime_plugin.TextCommand):
         self.view.set_name("readme.txt")
         self.view.settings().set("default_dir", path)
         self.view.insert(edit, 0, readme) # See at the bottom for the readme
+
+class AndroidImportProjectCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        # select folder dialog
+        self.window.run_command('prompt_open_folder')
+
+        #   check for AndroidManifest.xml
+        #       get app name
+        #       create a new sublime project file with appname and add folder
+        #       show readme?
+        #   else error dialog no AndroidManifest.xml not found, sure this funcional Android project?
+        return
+
 
 class AndroidOpenSdkCommand(sublime_plugin.WindowCommand):
     settings = []
@@ -916,11 +930,6 @@ class AndroidAdbLogcatCommand(sublime_plugin.WindowCommand):
             text, sdk + adb_bin]
         }
         self.window.run_command("exec", args)
-
-#TODO: Import existing project.
-class AndroidImportProjectCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        return
 
 class AndroidCleanCommand(sublime_plugin.WindowCommand):
     def run(self):
