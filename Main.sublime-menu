@@ -147,6 +147,12 @@
                             "caption": "New project",
                             "command": "android_new_project",
                             "mnemonic": "N"
+                        },
+                        {
+                            "id":"import_android_project",
+                            "caption": "Import project",
+                            "command": "android_import_project",
+                            "mnemonic": "I"
                         }
                     ]
             },
