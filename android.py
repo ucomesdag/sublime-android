@@ -204,7 +204,7 @@ class AndroidNewProjectCommand(sublime_plugin.WindowCommand):
         new_project += "        {\n"
         new_project += "            \"path\": \".\",\n"
         new_project += "            \"name\": \"%s\",\n" % self.project_name
-        new_project += "            \"folder_exclude_patterns\": [\"\"],\n"
+        new_project += "            \"folder_exclude_patterns\": [],\n"
         new_project += "            \"file_exclude_patterns\": [\"*.sublime-project\", \"*.sublime-workspace\"]\n"
         new_project += "        }\n"
         new_project += "    ]\n"
@@ -260,7 +260,7 @@ class AndroidImportProjectCommand(sublime_plugin.WindowCommand):
             new_project += "        {\n"
             new_project += "            \"path\": \".\",\n"
             new_project += "            \"name\": \"%s\",\n" % self.project_name
-            new_project += "            \"folder_exclude_patterns\": [\"\"],\n"
+            new_project += "            \"folder_exclude_patterns\": [],\n"
             new_project += "            \"file_exclude_patterns\": [\"*.sublime-project\", \"*.sublime-workspace\"]\n"
             new_project += "        }\n"
             new_project += "    ]\n"
@@ -686,6 +686,7 @@ class AndroidCreateCertificateCommand(sublime_plugin.WindowCommand):
     dname = ""
     password = ""
     CN = OU = O = L = ST = C = ""
+    keystore = ""
 
     def run(self):
         for folder in self.window.folders():
@@ -700,18 +701,20 @@ class AndroidCreateCertificateCommand(sublime_plugin.WindowCommand):
                 manifest = self.path + os.path.sep + "AndroidManifest.xml"
                 self.package = self.findPackage(manifest)
 
-                keystore = self.path + os.path.sep + "%s.keystore" % self.package
-                if os.path.isfile(keystore):
+                self.keystore = self.path + os.path.sep + "%s.keystore" % self.package
+                if os.path.isfile(self.keystore):
                     if sublime.ok_cancel_dialog("Certificate (%s.keystore) already exists!\n\n" % self.package +
                         "Do you want to replace it?"):
-                        # Delete existing keystore
-                        os.remove(keystore)
                         self.passwordPrompt()
 
                 else:
                     self.passwordPrompt()
 
     def generate(self):
+        # Delete existing keystore
+        if os.path.isfile(self.keystore):
+            os.remove(self.keystore)
+
         # Generate Certificate
         cmd = ["keytool", "-genkey", "-v",
             "-keystore", "%s.keystore" % self.package,
