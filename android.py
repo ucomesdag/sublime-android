@@ -11,8 +11,8 @@ from Default.exec import ExecCommand
 import platform
 
 scriptpath = os.path.sep.join([os.path.dirname(os.path.abspath(__file__)), ""])
-#platform = sublime.platform() #Stopped working in sublime text 3 beta
-platform = platform.system().lower().replace('darwin', 'osx')
+platform = sublime.platform() #Stopped working in sublime text 3 beta (fixed in build 3011)
+#platform = platform.system().lower().replace('darwin', 'osx')
 
 adb_bin = os.path.sep.join(["platform-tools","adb"])
 logcat_script = "logcat"
@@ -40,7 +40,7 @@ args = {
         }
 settings_file = args[platform]
 
-#TODO:
+#TODO: Clean this up
 def getBuiltTargets():
     targets = []
     settings = AndroidSettings(sublime.load_settings(settings_file))
