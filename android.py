@@ -1006,6 +1006,71 @@ class AndroidCleanCommand(sublime_plugin.WindowCommand):
             for filename in fnmatch.filter(files, pattern):
                 return path
 
+class AndroidRefactorStringCommand(sublime_plugin.TextCommand):
+    text = ""
+    tag = ""
+    region = None
+    edit = None
+
+    def run(self, edit):
+        #check if android project
+        folder = sublime.active_window().folders()[0]
+        path = self.locatePath("AndroidManifest.xml", folder)
+        if path is not None and os.path.isfile(path + os.path.sep + "AndroidManifest.xml"):
+
+            self.edit = edit
+            sels = self.view.sel()
+            new_sels = []
+            for sel in sels:
+                begin = sel.a
+                end = sel.b
+                line_begin = self.view.full_line(sel.a).a
+                line_end = self.view.full_line(sel.b).b
+                while self.view.substr(begin) != '"' and begin >= line_begin:
+                    if begin == line_begin:
+                        return
+                    begin -= 1
+                begin += 1
+                while self.view.substr(end) != '"' and end <= line_end:
+                    if end == line_end:
+                        return
+                    end += 1
+                new_sels.append(sublime.Region(begin, end))
+            for sel in new_sels:
+                self.text = self.view.substr(sel)
+                self.tag = self.slugify(self.view.substr(sel))
+                self.region = sel
+                sublime.active_window().show_input_panel("String name:", self.tag, self.on_done, None, None)
+
+    def on_done(self, text):
+        self.tag = text
+        self.add_to_strings_xml(self.text, self.tag)
+
+    def slugify(self, str):
+        str = str.lower()
+        return re.sub(r'\W+', '_', str)
+
+    def add_to_strings_xml(self, text, tag):
+        for folder in sublime.active_window().folders():
+            stringsxml = self.locatePath("strings.xml", folder)
+            if stringsxml is not None:
+                stringsxml += "/strings.xml"
+                file = open(stringsxml, 'r')
+                strings_content = file.read()
+                file.close()
+                file = open(stringsxml, 'w')
+                new_block = '<string name="' + tag + '">' + text + '</string>'
+                strings_content = strings_content.replace("</resources>", "\t" + new_block + "\n</resources>")
+                sublime.active_window().active_view().replace(self.edit, self.region, "@string/" + self.tag)
+                print(strings_content)
+                file.write(strings_content)
+                file.close()
+
+    def locatePath(self, pattern, root=os.curdir):
+        for path, dirs, files in os.walk(os.path.abspath(root)):
+            for filename in fnmatch.filter(files, pattern):
+                return path
+
 readme = """\
 Android projects are the projects that eventually get built into an .apk file
 that you install onto a device. They contain things such as application
