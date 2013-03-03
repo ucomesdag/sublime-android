@@ -1,5 +1,5 @@
 [
-    { "caption": "Android: New Android Project", "command": "android_new_project" }
+    { "caption": "Android: New Android Project", "command": "android_new_project" },
     { "caption": "Android: Import Android Project", "command": "android_import_project" },
 
     { "caption": "Android: Build", "command": "android_build" },
