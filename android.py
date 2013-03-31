@@ -1006,39 +1006,40 @@ class AndroidCleanCommand(sublime_plugin.WindowCommand):
             for filename in fnmatch.filter(files, pattern):
                 return path
 
-class AndroidRefactorStringCommand(sublime_plugin.TextCommand):
+class AndroidRefactorStringCommand(sublime_plugin.WindowCommand):
     text = ""
     tag = ""
     region = None
     edit = None
 
-    def run(self, edit):
+    def run(self):
         #check if android project
         folder = sublime.active_window().folders()[0]
         path = self.locatePath("AndroidManifest.xml", folder)
         if path is not None and os.path.isfile(path + os.path.sep + "AndroidManifest.xml"):
 
-            self.edit = edit
-            sels = self.view.sel()
+            view = self.window.active_view()
+
+            sels = view.sel()
             new_sels = []
             for sel in sels:
                 begin = sel.a
                 end = sel.b
-                line_begin = self.view.full_line(sel.a).a
-                line_end = self.view.full_line(sel.b).b
-                while self.view.substr(begin) != '"' and begin >= line_begin:
+                line_begin = view.full_line(sel.a).a
+                line_end = view.full_line(sel.b).b
+                while view.substr(begin) != '"' and begin >= line_begin:
                     if begin == line_begin:
                         return
                     begin -= 1
                 begin += 1
-                while self.view.substr(end) != '"' and end <= line_end:
+                while view.substr(end) != '"' and end <= line_end:
                     if end == line_end:
                         return
                     end += 1
                 new_sels.append(sublime.Region(begin, end))
             for sel in new_sels:
-                self.text = self.view.substr(sel)
-                self.tag = self.slugify(self.view.substr(sel))
+                self.text = view.substr(sel)
+                self.tag = self.slugify(view.substr(sel))
                 self.region = sel
                 sublime.active_window().show_input_panel("String name:", self.tag, self.on_done, None, None)
 
@@ -1061,15 +1062,21 @@ class AndroidRefactorStringCommand(sublime_plugin.TextCommand):
                 file = open(stringsxml, 'w')
                 new_block = '<string name="' + tag + '">' + text + '</string>'
                 strings_content = strings_content.replace("</resources>", "\t" + new_block + "\n</resources>")
-                sublime.active_window().active_view().replace(self.edit, self.region, "@string/" + self.tag)
-                print(strings_content)
                 file.write(strings_content)
                 file.close()
+
+                if self.window.active_view():
+                    args = {"begin": self.region.begin(), "end": self.region.end(), "tag": self.tag}
+                    self.window.active_view().run_command("android_replace_with_tag", args )
 
     def locatePath(self, pattern, root=os.curdir):
         for path, dirs, files in os.walk(os.path.abspath(root)):
             for filename in fnmatch.filter(files, pattern):
                 return path
+
+class AndroidReplaceWithTagCommand(sublime_plugin.TextCommand):
+    def run(self, edit, begin, end, tag):
+        self.view.replace(edit, sublime.Region(begin, end), "@string/" + tag)
 
 readme = """\
 Android projects are the projects that eventually get built into an .apk file
