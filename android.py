@@ -129,8 +129,14 @@ class AndroidNewProjectCommand(sublime_plugin.WindowCommand):
         self.window.show_input_panel("Project name:", "", self.on_project_name_input, None, None)
 
     def on_project_name_input(self, text):
-        self.project_name = text
-        self.window.show_input_panel("Activity name:", self.project_name.lower(), self.on_activity_name_input, None, None)
+        if len(text) < 2:
+            self.window.show_input_panel("Project name: Name too short!", "", self.on_project_name_input, None, None)
+        else:
+            if re.match('^[a-zA-Z0-9_]*$', text):
+                self.project_name = text
+                self.window.show_input_panel("Activity name:", self.project_name.lower(), self.on_activity_name_input, None, None)
+            else:
+                self.window.show_input_panel("Project name: Allowed characters are: a-z A-Z 0-9 _", "", self.on_project_name_input, None, None)
 
     def on_activity_name_input(self, text):
         self.activity_name = text
@@ -175,9 +181,11 @@ class AndroidNewProjectCommand(sublime_plugin.WindowCommand):
         sdk = self.settings.sdk
         jdk = self.settings.jdk
         print("Creating project (%s)" % self.project_path)
+
         # Create folder containing the project
         if not os.path.exists(self.project_path):
             os.makedirs(self.project_path)
+
         # Call android SDK to setup a new project
         args = {
             "cmd": [sdk + android_bin,
@@ -216,22 +224,15 @@ class AndroidNewProjectCommand(sublime_plugin.WindowCommand):
         self.window.run_command('open_project', [project_file])
         sublime.active_window().open_file(project_file)
 
-        self.window.run_command('android_show_readme', {"path": self.project_path})
+        self.window.new_file().run_command('android_show_readme', {"path": self.project_path})
         self.window.run_command('set_build_system', {"file": "Packages/Android/Android.sublime-build"})
 
 class AndroidShowReadmeCommand(sublime_plugin.TextCommand):
-    def run_(self, edit_token, args):
-        self.view = sublime.active_window().new_file()
-        edit = self.view.begin_edit(edit_token, self.name(), args)
-        try:
-            self.run(edit, **args)
-        finally:
-            self.view.end_edit(edit)
-
     def run(self, edit, path = ""):
         self.view.set_name("readme.txt")
         self.view.settings().set("default_dir", path)
         self.view.insert(edit, 0, readme) # See at the bottom for the readme
+        self.view.show(0)
 
 class AndroidImportProjectCommand(sublime_plugin.WindowCommand):
     project_path = ""
