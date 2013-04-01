@@ -6,20 +6,27 @@ It automates basic tasks like:
 
 * creating new projects
 * refactor strings
-* snippets
+* _snippets - todo_
 * build
 * build on save
 * create certificates
 * install apk's
 * uninstall apk's
 * run on device
-* run adb shell
-* run logcat
+* _run adb shell - Not working: Terminal plugin not yet compatable with ST3_
+* _run logcat - Not working: Terminal plugin not yet compatable with ST3_
 * access sdk tools
 
 It should work on windows/osx/linux.
 
 ## Recent Changes ##
+
+###0.1###
+
+* Added string refactoring
+* Added project import
+* Fixed readme not showing on new project creation
+* Fixed new project and import project missing subfolders
 
 ###0.0###
 
