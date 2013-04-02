@@ -1,10 +1,13 @@
 [
-    { "caption": "Android: New Android Project", "command": "android_new_project" }
+    { "caption": "Android: New Android Project", "command": "android_new_project" },
+    { "caption": "Android: Import Android Project", "command": "android_import_project" },
+
+    { "caption": "Android: Refactor String", "command": "android_refactor_string" },
 
     { "caption": "Android: Build", "command": "android_build" },
-    { "caption": "Android: Set Debug Mode", "command": "android_build_debug" },
-    { "caption": "Android: Set Build On Save", "command": "android_build_on_save" },
-    { "caption": "Android: Set Run On Device", "command": "android_run_on_device" },
+    { "caption": "Android: Toggle Debug Mode", "command": "android_build_debug" },
+    { "caption": "Android: Toggle Build On Save", "command": "android_build_on_save" },
+    { "caption": "Android: Toggle Run On Device", "command": "android_run_on_device" },
     { "caption": "Android: Clean Project", "command": "android_clean" },
 
     { "caption": "Android: Install APK", "command": "android_install" },
@@ -14,7 +17,7 @@
 
     { "caption": "Android: Create Certificate", "command": "android_create_certificate" },
 
-    { "caption": "Android: Android SDK Manager", "command": "android_open_sdk" },
+    { "caption": "Android: Open SDK Manager", "command": "android_open_sdk" },
     { "caption": "Android: Open Devices / AVD Manager", "command": "android_open_avd" },
-    { "caption": "Android: DDMS", "command": "android_open_ddms" }
+    { "caption": "Android: Open DDMS", "command": "android_open_ddms" }
 ]

@@ -11,7 +11,8 @@ from Default.exec import ExecCommand
 import platform
 
 scriptpath = os.path.sep.join([os.path.dirname(os.path.abspath(__file__)), ""])
-platform = platform.system()
+platform = sublime.platform() #Stopped working in sublime text 3 beta (fixed in build 3011)
+#platform = platform.system().lower().replace('darwin', 'osx')
 
 adb_bin = os.path.sep.join(["platform-tools","adb"])
 logcat_script = "logcat"
@@ -20,7 +21,7 @@ android_bin = os.path.sep.join(["tools", "android"])
 ddms_bin = os.path.sep.join(["tools", "ddms"])
 ant_bin = "ant"
 java_bin = os.path.sep.join(["bin","java"])
-if platform == 'Windows' :
+if platform == 'windows' :
     adb_bin += ".exe"
     logcat_script += ".bat"
     run_script += ".bat"
@@ -32,26 +33,20 @@ else:
     logcat_script += ".sh"
     run_script += ".sh"
 
-# args = {
-#             'windows': "Android (Windows).sublime-settings",
-#             'osx': "Android (OSX).sublime-settings",
-#             'linux': "Android (Linux).sublime-settings"
-#         }
-# settings_file = args[platform]
 args = {
-            'Windows': "Android (Windows).sublime-settings",
-            'Darwin': "Android (OSX).sublime-settings",
-            'Linux': "Android (Linux).sublime-settings"
+            'windows': "Android (Windows).sublime-settings",
+            'osx': "Android (OSX).sublime-settings",
+            'linux': "Android (Linux).sublime-settings"
         }
-
 settings_file = args[platform]
 
+#TODO: Clean this up
 def getBuiltTargets():
     targets = []
     settings = AndroidSettings(sublime.load_settings(settings_file))
     if not settings.is_valid():
         return
-    if platform == 'Windows' :
+    if platform == 'windows' :
         si = subprocess.STARTUPINFO()
         si.dwFlags = subprocess.STARTF_USESTDHANDLES | subprocess.STARTF_USESHOWWINDOW
     else:
@@ -134,8 +129,14 @@ class AndroidNewProjectCommand(sublime_plugin.WindowCommand):
         self.window.show_input_panel("Project name:", "", self.on_project_name_input, None, None)
 
     def on_project_name_input(self, text):
-        self.project_name = text
-        self.window.show_input_panel("Activity name:", self.project_name.lower(), self.on_activity_name_input, None, None)
+        if len(text) < 2:
+            self.window.show_input_panel("Project name: Name too short!", "", self.on_project_name_input, None, None)
+        else:
+            if re.match('^[a-zA-Z0-9_]*$', text):
+                self.project_name = text
+                self.window.show_input_panel("Activity name:", self.project_name.lower(), self.on_activity_name_input, None, None)
+            else:
+                self.window.show_input_panel("Project name: Allowed characters are: a-z A-Z 0-9 _", "", self.on_project_name_input, None, None)
 
     def on_activity_name_input(self, text):
         self.activity_name = text
@@ -180,9 +181,11 @@ class AndroidNewProjectCommand(sublime_plugin.WindowCommand):
         sdk = self.settings.sdk
         jdk = self.settings.jdk
         print("Creating project (%s)" % self.project_path)
+
         # Create folder containing the project
         if not os.path.exists(self.project_path):
             os.makedirs(self.project_path)
+
         # Call android SDK to setup a new project
         args = {
             "cmd": [sdk + android_bin,
@@ -209,33 +212,91 @@ class AndroidNewProjectCommand(sublime_plugin.WindowCommand):
         new_project += "        {\n"
         new_project += "            \"path\": \".\",\n"
         new_project += "            \"name\": \"%s\",\n" % self.project_name
-        new_project += "            \"folder_exclude_patterns\": [\"\"],\n"
+        new_project += "            \"folder_exclude_patterns\": [],\n"
         new_project += "            \"file_exclude_patterns\": [\"*.sublime-project\", \"*.sublime-workspace\"]\n"
         new_project += "        }\n"
         new_project += "    ]\n"
         new_project += "}"
-        project_file = os.path.sep.join([self.project_path, "%s.sublime-project"%self.project_name])
+        project_file = os.path.sep.join([self.project_path, "%s.sublime-project" % self.project_name])
         with open(project_file, 'w') as file:
             file.write(new_project)
         #TODO: Fix opening the project.
         self.window.run_command('open_project', [project_file])
         sublime.active_window().open_file(project_file)
 
-        self.window.run_command('android_show_readme', {"path": self.project_path})
+        self.window.new_file().run_command('android_show_readme', {"path": self.project_path})
+        self.window.run_command('set_build_system', {"file": "Packages/Android/Android.sublime-build"})
 
 class AndroidShowReadmeCommand(sublime_plugin.TextCommand):
-    def run_(self, edit_token, args):
-        self.view = sublime.active_window().new_file()
-        edit = self.view.begin_edit(edit_token, self.name(), args)
-        try:
-            self.run(edit, **args)
-        finally:
-            self.view.end_edit(edit)
-
     def run(self, edit, path = ""):
         self.view.set_name("readme.txt")
         self.view.settings().set("default_dir", path)
         self.view.insert(edit, 0, readme) # See at the bottom for the readme
+        self.view.show(0)
+
+class AndroidImportProjectCommand(sublime_plugin.WindowCommand):
+    project_path = ""
+    project_name = ""
+    def run(self):
+        self.window.run_command('prompt_open_folder')
+
+        #   check for AndroidManifest.xml
+        folder = sublime.active_window().folders()[0]
+        self.project_path = self.locatePath("AndroidManifest.xml", folder)
+
+        #check if android project (exclude the binary folder)
+        if os.path.isfile(self.project_path + os.path.sep + "AndroidManifest.xml") and \
+                not re.search(os.path.sep + "bin", self.project_path):
+            self.settings = AndroidSettings(sublime.load_settings(settings_file))
+            if not self.settings.is_valid():
+                return
+
+            # get app name from AndroidManifest.xml
+            self.project_name = self.findActivity(self.project_path + os.path.sep + "AndroidManifest.xml").replace('.', '')
+
+            # create a new sublime project file with appname and add folder
+            new_project  = "{\n"
+            new_project += "    \"folders\":\n"
+            new_project += "    [\n"
+            new_project += "        {\n"
+            new_project += "            \"path\": \".\",\n"
+            new_project += "            \"name\": \"%s\",\n" % self.project_name
+            new_project += "            \"folder_exclude_patterns\": [],\n"
+            new_project += "            \"file_exclude_patterns\": [\"*.sublime-project\", \"*.sublime-workspace\"]\n"
+            new_project += "        }\n"
+            new_project += "    ]\n"
+            new_project += "}"
+            project_file = os.path.sep.join([self.project_path, "%s.sublime-project" % self.project_name])
+            with open(project_file, 'w') as file:
+                file.write(new_project)
+            #TODO: Fix opening the project.
+            self.window.run_command('open_project', [project_file])
+            sublime.active_window().open_file(project_file)
+
+            # show readme
+            self.window.run_command('android_show_readme', {"path": self.project_path})
+            self.window.run_command('set_build_system', {"file": "Packages/Android/Android.sublime-build"})
+            return
+        # else error dialog no AndroidManifest.xml not found
+        sublime.error_message( "Error: No android project found.\n\nAndroidManifest.xml not found." )
+
+        return
+
+    def findActivity(self, xmlFile):
+        if not os.path.isfile(xmlFile):
+            return
+        file = open(xmlFile, 'r')
+        lines = file.readlines()
+        for line in lines:
+            match = re.search("^\s*android:name=\"([\.a-zA-Z1-9]+)\"", line)
+            if match:
+                return match.group(1)
+
+    def locatePath(self, pattern, root=os.curdir):
+        for path, dirs, files in os.walk(os.path.abspath(root)):
+            for filename in fnmatch.filter(files, pattern):
+                return path
+
 
 class AndroidOpenSdkCommand(sublime_plugin.WindowCommand):
     settings = []
@@ -243,7 +304,7 @@ class AndroidOpenSdkCommand(sublime_plugin.WindowCommand):
         self.settings = AndroidSettings(sublime.load_settings(settings_file))
         if not self.settings.is_valid():
             return
-        if platform == 'Windows' :
+        if platform == 'windows' :
             subprocess.Popen([self.settings.sdk + android_bin, "sdk"], creationflags=0x08000000, shell=False)
         else:
             subprocess.Popen([self.settings.sdk + android_bin, "sdk"], shell=False)
@@ -254,7 +315,7 @@ class AndroidOpenAvdCommand(sublime_plugin.WindowCommand):
         self.settings = AndroidSettings(sublime.load_settings(settings_file))
         if not self.settings.is_valid():
             return
-        if platform == 'Windows' :
+        if platform == 'windows' :
             subprocess.Popen([self.settings.sdk + android_bin, "avd"], creationflags=0x08000000, shell=False)
         else:
             subprocess.Popen([self.settings.sdk + android_bin, "avd"], shell=False)
@@ -265,7 +326,7 @@ class AndroidOpenDdmsCommand(sublime_plugin.WindowCommand):
         self.settings = AndroidSettings(sublime.load_settings(settings_file))
         if not self.settings.is_valid():
             return
-        if platform == 'Windows' :
+        if platform == 'windows' :
             subprocess.Popen([self.settings.sdk + ddms_bin], creationflags=0x08000000, shell=False)
         else:
             subprocess.Popen([self.settings.sdk + ddms_bin], shell=False)
@@ -410,10 +471,10 @@ class AndroidBuildCommand(sublime_plugin.WindowCommand):
         #     "--path", self.path]
         # }
         # self.window.run_command("exec", args)
-        self.cmd_buildxml = [self.settings.sdk + android_bin,
+        self.cmd = [self.settings.sdk + android_bin,
             "update", "project",
             "--target", "\"%s\"" % self.build_target,
-            "--path", self.path]
+            "--path", "\"%s\"" % self.path]
         self.build()
 
     def build(self):
@@ -626,6 +687,7 @@ class AndroidCreateCertificateCommand(sublime_plugin.WindowCommand):
     dname = ""
     password = ""
     CN = OU = O = L = ST = C = ""
+    keystore = ""
 
     def run(self):
         for folder in self.window.folders():
@@ -640,18 +702,20 @@ class AndroidCreateCertificateCommand(sublime_plugin.WindowCommand):
                 manifest = self.path + os.path.sep + "AndroidManifest.xml"
                 self.package = self.findPackage(manifest)
 
-                keystore = self.path + os.path.sep + "%s.keystore" % self.package
-                if os.path.isfile(keystore):
+                self.keystore = self.path + os.path.sep + "%s.keystore" % self.package
+                if os.path.isfile(self.keystore):
                     if sublime.ok_cancel_dialog("Certificate (%s.keystore) already exists!\n\n" % self.package +
                         "Do you want to replace it?"):
-                        # Delete existing keystore
-                        os.remove(keystore)
                         self.passwordPrompt()
 
                 else:
                     self.passwordPrompt()
 
     def generate(self):
+        # Delete existing keystore
+        if os.path.isfile(self.keystore):
+            os.remove(self.keystore)
+
         # Generate Certificate
         cmd = ["keytool", "-genkey", "-v",
             "-keystore", "%s.keystore" % self.package,
@@ -871,7 +935,7 @@ class AndroidAdbShellCommand(sublime_plugin.WindowCommand):
         else:
             # The following is only tested on ubuntu
             param = ""
-            if platform == 'Windows': param = ''
+            if platform == 'windows': param = ''
             elif platform == 'Darwin': param = '-x'
             elif platform == 'Linux':
                 ps = 'ps -eo comm | grep -E "gnome-session|ksmserver|' + \
@@ -917,11 +981,6 @@ class AndroidAdbLogcatCommand(sublime_plugin.WindowCommand):
         }
         self.window.run_command("exec", args)
 
-#TODO: Import existing project.
-class AndroidImportProjectCommand(sublime_plugin.WindowCommand):
-    def run(self):
-        return
-
 class AndroidCleanCommand(sublime_plugin.WindowCommand):
     def run(self):
         for folder in self.window.folders():
@@ -947,6 +1006,78 @@ class AndroidCleanCommand(sublime_plugin.WindowCommand):
         for path, dirs, files in os.walk(os.path.abspath(root)):
             for filename in fnmatch.filter(files, pattern):
                 return path
+
+class AndroidRefactorStringCommand(sublime_plugin.WindowCommand):
+    text = ""
+    tag = ""
+    region = None
+    edit = None
+
+    def run(self):
+        #check if android project
+        folder = sublime.active_window().folders()[0]
+        path = self.locatePath("AndroidManifest.xml", folder)
+        if path is not None and os.path.isfile(path + os.path.sep + "AndroidManifest.xml"):
+
+            view = self.window.active_view()
+
+            sels = view.sel()
+            new_sels = []
+            for sel in sels:
+                begin = sel.a
+                end = sel.b
+                line_begin = view.full_line(sel.a).a
+                line_end = view.full_line(sel.b).b
+                while view.substr(begin) != '"' and begin >= line_begin:
+                    if begin == line_begin:
+                        return
+                    begin -= 1
+                begin += 1
+                while view.substr(end) != '"' and end <= line_end:
+                    if end == line_end:
+                        return
+                    end += 1
+                new_sels.append(sublime.Region(begin, end))
+            for sel in new_sels:
+                self.text = view.substr(sel)
+                self.tag = self.slugify(view.substr(sel))
+                self.region = sel
+                sublime.active_window().show_input_panel("String name:", self.tag, self.on_done, None, None)
+
+    def on_done(self, text):
+        self.tag = text
+        self.add_to_strings_xml(self.text, self.tag)
+
+    def slugify(self, str):
+        str = str.lower()
+        return re.sub(r'\W+', '_', str)
+
+    def add_to_strings_xml(self, text, tag):
+        for folder in sublime.active_window().folders():
+            stringsxml = self.locatePath("strings.xml", folder)
+            if stringsxml is not None:
+                stringsxml += "/strings.xml"
+                file = open(stringsxml, 'r')
+                strings_content = file.read()
+                file.close()
+                file = open(stringsxml, 'w')
+                new_block = '<string name="' + tag + '">' + text + '</string>'
+                strings_content = strings_content.replace("</resources>", "\t" + new_block + "\n</resources>")
+                file.write(strings_content)
+                file.close()
+
+                if self.window.active_view():
+                    args = {"begin": self.region.begin(), "end": self.region.end(), "tag": self.tag}
+                    self.window.active_view().run_command("android_replace_with_tag", args )
+
+    def locatePath(self, pattern, root=os.curdir):
+        for path, dirs, files in os.walk(os.path.abspath(root)):
+            for filename in fnmatch.filter(files, pattern):
+                return path
+
+class AndroidReplaceWithTagCommand(sublime_plugin.TextCommand):
+    def run(self, edit, begin, end, tag):
+        self.view.replace(edit, sublime.Region(begin, end), "@string/" + tag)
 
 readme = """\
 Android projects are the projects that eventually get built into an .apk file

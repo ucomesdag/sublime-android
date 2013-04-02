@@ -147,8 +147,29 @@
                             "caption": "New project",
                             "command": "android_new_project",
                             "mnemonic": "N"
+                        },
+                        {
+                            "id":"import_android_project",
+                            "caption": "Import project",
+                            "command": "android_import_project",
+                            "mnemonic": "I"
                         }
                     ]
+            },
+            { "caption": "-", "id": "sep" },
+            {
+                "id": "refactor",
+                "caption": "Refactor...",
+                "mnemonic": "R",
+                "children":
+                [
+                    {
+                        "id": "refactor_string",
+                        "caption": "String",
+                        "command": "android_refactor_string",
+                        "mnemonic": "S"
+                    }
+                ]
             },
             { "caption": "-", "id": "sep" },
             {
@@ -167,14 +188,14 @@
                     {
                         "id": "build_debug",
                         "checkbox": true,
-                        "caption": "Compile debug",
+                        "caption": "Build debug",
                         "command": "android_build_debug",
                         "mnemonic": "S"
                     },
                     {
-                        "id": "compile_on_save",
+                        "id": "build_on_save",
                         "checkbox": true,
-                        "caption": "Compile on save",
+                        "caption": "Build on save",
                         "command": "android_build_on_save",
                         "mnemonic": "S"
                     },
