@@ -934,10 +934,10 @@ class AndroidAdbShellCommand(sublime_plugin.WindowCommand):
                 "http://wbond.net/sublime_packages/terminal" )
         else:
             # The following is only tested on ubuntu
-            param = ""
+            param = ''
             if platform == 'windows': param = ''
-            elif platform == 'Darwin': param = '-x'
-            elif platform == 'Linux':
+            elif platform == 'darwin': param = '-x'
+            elif platform == 'linux':
                 ps = 'ps -eo comm | grep -E "gnome-session|ksmserver|' + \
                     'xfce4-session" | grep -v grep'
                 wm = [x.replace("\n", '') for x in os.popen(ps)]

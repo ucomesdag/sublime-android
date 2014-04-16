@@ -13,13 +13,17 @@ It automates basic tasks like:
 * install apk's
 * uninstall apk's
 * run on device
-* _run adb shell - Not working: Terminal plugin not yet compatable with ST3_
-* _run logcat - Not working: Terminal plugin not yet compatable with ST3_
+* run adb shell
+* run logcat
 * access sdk tools
 
 It should work on windows/osx/linux.
 
 ## Recent Changes ##
+
+###0.2###
+
+* Fixed running adb shell from the menu
 
 ###0.1###
 
