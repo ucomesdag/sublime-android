@@ -171,6 +171,27 @@
                     }
                 ]
             },
+            {
+                "id": "snippet",
+                "caption": "Snipets...",
+                "mnemonic": "S",
+                "children":
+                [
+                    {
+                        "id": "insert_snippet",
+                        "caption": "Insert snippet",
+                        "command": "android_insert_snippet",
+                        "mnemonic": "I"
+                    },
+                    { "caption": "-", "id": "sep" },
+                    {
+                        "id": "explore_snippet",
+                        "caption": "Edit snippets",
+                        "command": "android_explore_snippets",
+                        "mnemonic": "N"
+                    }
+                ]
+            },
             { "caption": "-", "id": "sep" },
             {
                 "caption": "Build...",

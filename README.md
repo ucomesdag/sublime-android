@@ -6,7 +6,7 @@ It automates basic tasks like:
 
 * creating new projects
 * refactor strings
-* _snippets - todo_
+* snippets
 * build
 * build on save
 * create certificates
@@ -23,6 +23,7 @@ It should work on windows/osx/linux.
 
 ###0.2###
 
+* Added snippets
 * Fixed running adb shell from the menu
 
 ###0.1###
@@ -40,3 +41,8 @@ It should work on windows/osx/linux.
 
 * [Android SDK](http://developer.android.com/sdk/index.html)
 * [Ant](http://ant.apache.org/) (needed for compiling Android applications).
+
+## Acknowledgments
+
+Original work: [@uint9](http://9bitscience.blogspot.com/2012/06/sublime-text-2-android-plugin.html)
+Insipred by and snippets from: [Andrew](http://github.com/Korcholis/Andrew)
