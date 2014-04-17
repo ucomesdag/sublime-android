@@ -4,6 +4,9 @@
 
     { "caption": "Android: Refactor String", "command": "android_refactor_string" },
 
+    { "caption": "Android: Insert snippet", "command": "android_insert_snippet" },
+    { "caption": "Android: Edit snippets", "command": "android_explore_snippets" },
+
     { "caption": "Android: Build", "command": "android_build" },
     { "caption": "Android: Toggle Debug Mode", "command": "android_build_debug" },
     { "caption": "Android: Toggle Build On Save", "command": "android_build_on_save" },
