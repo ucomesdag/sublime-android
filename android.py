@@ -934,10 +934,10 @@ class AndroidAdbShellCommand(sublime_plugin.WindowCommand):
                 "http://wbond.net/sublime_packages/terminal" )
         else:
             # The following is only tested on ubuntu
-            param = ""
+            param = ''
             if platform == 'windows': param = ''
-            elif platform == 'Darwin': param = '-x'
-            elif platform == 'Linux':
+            elif platform == 'darwin': param = '-x'
+            elif platform == 'linux':
                 ps = 'ps -eo comm | grep -E "gnome-session|ksmserver|' + \
                     'xfce4-session" | grep -v grep'
                 wm = [x.replace("\n", '') for x in os.popen(ps)]
@@ -1078,6 +1078,39 @@ class AndroidRefactorStringCommand(sublime_plugin.WindowCommand):
 class AndroidReplaceWithTagCommand(sublime_plugin.TextCommand):
     def run(self, edit, begin, end, tag):
         self.view.replace(edit, sublime.Region(begin, end), "@string/" + tag)
+
+class AndroidInsertSnippetCommand(sublime_plugin.TextCommand):
+    snippets = []
+    snippetsHeaders = []
+
+    def run(self, text):
+        self.snippets = self.getSnippets()
+        self.snippetsHeaders = self.stripFileExt(self.snippets)
+        self.view.window().show_quick_panel(self.snippetsHeaders, self.on_done, sublime.MONOSPACE_FONT)
+        return
+
+    def getSnippets(self):
+        snippet_path = os.path.sep.join([os.path.dirname(os.path.abspath(__file__)), "snippets/"])
+        snippets = os.listdir(snippet_path)
+        snippets.sort()
+        return snippets
+
+    def stripFileExt(self, files):
+        filenames = []
+        for filename in files:
+            filenames.append(os.path.splitext(filename)[0])
+        return filenames
+
+    def on_done(self, index):
+        if index < 0:
+            return
+        snippet = self.snippets[index]
+        self.view.run_command('insert_snippet', {"name": "Packages/Android/snippets/" + snippet})
+
+class AndroidExploreSnippets(sublime_plugin.WindowCommand):
+    def run(self):
+        self.window.run_command('open_dir', {"dir": "$packages/Android/snippets/"})
+        return
 
 readme = """\
 Android projects are the projects that eventually get built into an .apk file

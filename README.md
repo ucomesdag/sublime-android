@@ -6,20 +6,25 @@ It automates basic tasks like:
 
 * creating new projects
 * refactor strings
-* _snippets - todo_
+* snippets
 * build
 * build on save
 * create certificates
 * install apk's
 * uninstall apk's
 * run on device
-* _run adb shell - Not working: Terminal plugin not yet compatable with ST3_
-* _run logcat - Not working: Terminal plugin not yet compatable with ST3_
+* run adb shell
+* run logcat
 * access sdk tools
 
 It should work on windows/osx/linux.
 
 ## Recent Changes ##
+
+###0.2###
+
+* Added snippets
+* Fixed running adb shell from the menu
 
 ###0.1###
 
@@ -36,3 +41,8 @@ It should work on windows/osx/linux.
 
 * [Android SDK](http://developer.android.com/sdk/index.html)
 * [Ant](http://ant.apache.org/) (needed for compiling Android applications).
+
+## Credits & Acknowledgments
+
+Original work: [@uint9](http://9bitscience.blogspot.com/2012/06/sublime-text-2-android-plugin.html)  
+Inspired by and snippets from: [Andrew](http://github.com/Korcholis/Andrew)
