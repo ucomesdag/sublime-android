@@ -42,7 +42,7 @@ It should work on windows/osx/linux.
 * [Android SDK](http://developer.android.com/sdk/index.html)
 * [Ant](http://ant.apache.org/) (needed for compiling Android applications).
 
-## Acknowledgments
+## Credits & Acknowledgments
 
-Original work: [@uint9](http://9bitscience.blogspot.com/2012/06/sublime-text-2-android-plugin.html)
-Insipred by and snippets from: [Andrew](http://github.com/Korcholis/Andrew)
+Original work: [@uint9](http://9bitscience.blogspot.com/2012/06/sublime-text-2-android-plugin.html)  
+Inspired by and snippets from: [Andrew](http://github.com/Korcholis/Andrew)
