@@ -5,6 +5,7 @@ This is a pluging for Android development with [Sublime Text 3](http://www.subli
 It automates basic tasks like:
 
 * creating new projects
+* importing existing projects
 * refactor strings
 * snippets
 * build
@@ -20,6 +21,10 @@ It automates basic tasks like:
 It should work on windows/osx/linux.
 
 ## Recent Changes ##
+
+###0.3###
+
+* Cleaned up the code
 
 ###0.2###
 

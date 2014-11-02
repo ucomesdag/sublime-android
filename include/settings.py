@@ -63,7 +63,6 @@ class AndroidSettings():
             self.settings['jdk_path'] = os.path.normcase(os.environ["JAVA_HOME"])
 
         self.settings['sdk_path'] = os.path.normcase(sublime.load_settings(self.settings_file).get('android_sdk'))
-
         self.settings['default_android_project_dir'] = sublime.load_settings(self.settings_file).get('default_android_project_dir')
         self.settings['debug'] = sublime.load_settings(self.settings_file).get('debug')
         self.settings['compile_on_save'] = sublime.load_settings(self.settings_file).get('compile_on_save')
