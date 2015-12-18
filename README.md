@@ -42,7 +42,33 @@ It should work on windows/osx/linux.
 * [Android SDK](http://developer.android.com/sdk/index.html)
 * [Ant](http://ant.apache.org/) (needed for compiling Android applications).
 
+## Installing
+
+**Linux:**
+
+ 1. Download: https://bitbucket.org/allyourco_de/sublime-android/get/master.zip
+ 2. Unzip the content to ~/.config/sublime-text-3/Packages/sublime-android
+
+-or-
+
+```
+cd ~/.config/sublime-text-3/Packages
+git clone git@bitbucket.org:allyourco_de/sublime-android.git sublime-android
+```
+
+**Windows:**
+
+ 1. Download: https://bitbucket.org/allyourco_de/sublime-android/get/master.zip
+ 2. Unzip the content to "%UserProfile%\AppData\Sublime Text 3\Packages\sublime-android"
+
+-or-
+
+```
+cd "%UserProfile%\AppData\Sublime Text 3\Packages"
+git clone git@bitbucket.org:allyourco_de/sublime-android.git sublime-android
+```
+
 ## Credits & Acknowledgments
 
-Original work: [@uint9](http://9bitscience.blogspot.com/2012/06/sublime-text-2-android-plugin.html)  
+Original work: [@uint9](http://9bitscience.blogspot.com/2012/06/sublime-text-2-android-plugin.html)
 Inspired by and snippets from: [Andrew](http://github.com/Korcholis/Andrew)
